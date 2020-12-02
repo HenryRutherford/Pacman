@@ -49,12 +49,12 @@ class NewAgent(Agent):
         """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
-        newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        print(newFood)
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        print(successorGameState.getScore())
+        #newPos = successorGameState.getPacmanPosition()
+        #newFood = successorGameState.getFood()
+        #print(newFood)
+        #newGhostStates = successorGameState.getGhostStates()
+        #newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        #print(successorGameState.getScore())
         #A*
         #f(n) = g(n) + h(n) : total cost = cost of successor + cost to goal by heuristic
         #best score of successor -> lowest cost, lowest score -> highest cost
@@ -68,23 +68,27 @@ class NewAgent(Agent):
         actions = []
         
         #check if goal node has been reached
-        goalReached = false
-        if(successorGameState.getNumFood() == 0)
-            goalReached = true
+        goalReached = False
+        if successorGameState.getNumFood() == 0:
+            goalReached = True
             
         #If goal node has not been reached, find next node. Else return score
-        while(!goalReached)
+        while (goalReached == False):
                        
             legalMoves = successorGameState.getLegalActions()
 
             # Choose one of the best actions
-            scores = [successorGameState.generatePacmanSuccessor(action).getScore() for action in legalMoves]
+            scores = []
+            for action in legalMoves:
+                scores.append(successorGameState.generatePacmanSuccessor(action).getScore()+ successorGameState.generatePacmanSuccessor(action).getNumFood()*10) 
+                actions.append(action)
             bestScore = max(scores)
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
+            actions.remove(chosenIndex)
             
-            if(successorGameState.getNumFood() == 0)
-                goalReached = true
+            if successorGameState.getNumFood() == 0:
+                goalReached = True
         
         #return total score
         return total
