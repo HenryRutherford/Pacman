@@ -66,6 +66,7 @@ class NewAgent(Agent):
         #initial total with initial state score
         #total = successorGameState.getScore() + successorGameState.getNumFood()*10
         actions = []
+        total = 0
         
         #check if goal node has been reached
         goalReached = False
@@ -85,7 +86,9 @@ class NewAgent(Agent):
             bestScore = max(scores)
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
-            actions.remove(chosenIndex)
+            actions.remove(legalMoves[chosenIndex])
+            total+=bestScore
+            successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
             if successorGameState.getNumFood() == 0:
                 goalReached = True
