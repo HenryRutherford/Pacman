@@ -67,12 +67,13 @@ class NewAgent(Agent):
         #total = successorGameState.getScore() + successorGameState.getNumFood()*10
         actions = []
         total = 0
+        count = 0
         
         #check if goal node has been reached
         goalReached = False
-        if successorGameState.getNumFood() == 0:
+        if successorGameState.getNumFood() == 0 | count == 5:
             goalReached = True
-            
+        print("search for goal state: pellets = 0")
         #If goal node has not been reached, find next node. Else return score
         while (goalReached == False):
                        
@@ -87,12 +88,14 @@ class NewAgent(Agent):
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
             actions.remove(legalMoves[chosenIndex])
-            total+=bestScore
+            total+=scores.pop(chosenIndex)
             successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
             if successorGameState.getNumFood() == 0:
                 goalReached = True
-        
+            count+= 1
+            
+        print("goal state reached.")
         #return total score
         return total
         #return successorGameState.getScore()
