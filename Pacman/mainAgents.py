@@ -71,8 +71,15 @@ class NewAgent(Agent):
         
         #check if goal node has been reached
         goalReached = False
-        if successorGameState.getNumFood() == 0 | count == 5:
-            goalReached = True
+        newGS = successorGameState
+        pos = newGS.getPacmanPosition()
+        ghostPos = newGS.getGhostPositions()
+        for gp in ghostPos:
+            d = abs(pos[0] - gp[0])
+            d = d + abs(pos[1] - gp[1])
+            if(d <= 1): 
+                total -= 1000
+                goalReached = True
         print("search for goal state: pellets = 0")
         #If goal node has not been reached, find next node. Else return score
         while (goalReached == False):
@@ -82,8 +89,11 @@ class NewAgent(Agent):
             # Choose one of the best actions
             scores = []
             for action in legalMoves:
-                scores.append(successorGameState.generatePacmanSuccessor(action).getScore()+ successorGameState.generatePacmanSuccessor(action).getNumFood()*10) 
+                newGS = successorGameState.generatePacmanSuccessor(action)
+                score = newGS.getScore() - (newGS.getNumFood() - currentGameState.getNumFood())
+                scores.append(score) 
                 actions.append(action)
+            if not score: break
             bestScore = max(scores)
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
@@ -91,7 +101,8 @@ class NewAgent(Agent):
             total+=scores.pop(chosenIndex)
             successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
-            if successorGameState.getNumFood() == 0 or count == 5:
+            
+            if successorGameState.getNumFood() == 0 or count == 8:
                 goalReached = True
             count+= 1
             
