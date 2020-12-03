@@ -91,7 +91,7 @@ class NewAgent(Agent):
             total+=scores.pop(chosenIndex)
             successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
-            if successorGameState.getNumFood() == 0:
+            if successorGameState.getNumFood() == 0 or count == 5:
                 goalReached = True
             count+= 1
             
@@ -99,4 +99,5 @@ class NewAgent(Agent):
         #return total score
         return total
         #return successorGameState.getScore()
+        
     
