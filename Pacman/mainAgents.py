@@ -26,6 +26,7 @@ class NewAgent(Agent):
 
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+        print(scores)
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
@@ -80,6 +81,8 @@ class NewAgent(Agent):
             if(d <= 1): 
                 total -= 1000
                 goalReached = True
+        if(newGS.isWin()):
+                    return 1000000
         print("search for goal state: pellets = 0")
         #If goal node has not been reached, find next node. Else return score
         while (goalReached == False):
@@ -91,9 +94,12 @@ class NewAgent(Agent):
             for action in legalMoves:
                 newGS = successorGameState.generatePacmanSuccessor(action)
                 score = newGS.getScore() - (newGS.getNumFood() - currentGameState.getNumFood())
+                #print(score)
+                if(newGS.isWin()):
+                    return 100000/(count+1)
                 scores.append(score) 
                 actions.append(action)
-            if not score: break
+            if not scores: break
             bestScore = max(scores)
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
@@ -102,13 +108,13 @@ class NewAgent(Agent):
             successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
             
-            if successorGameState.getNumFood() == 0 or count == 8:
+            if successorGameState.getNumFood() == 0 or count == 20:
                 goalReached = True
             count+= 1
             
         print("goal state reached.")
         #return total score
-        return total
+        return total/(count+1)
         #return successorGameState.getScore()
         
     
