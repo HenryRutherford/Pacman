@@ -38,7 +38,7 @@ class NewAgent(Agent):
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
         #print(legalMoves[chosenIndex] != self.plan[0])
-        if(legalMoves[chosenIndex] != self.plan[0]):
+        if(len(self.plan) > 0 and legalMoves[chosenIndex] != self.plan[0]):
             self.plan = ['Stop']
             self.planScore = 0
         else :
