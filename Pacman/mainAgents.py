@@ -5,12 +5,18 @@ from util import manhattanDistance
 from game import Agent
 
 class NewAgent(Agent):
-    """
-      An A* search agent
-
-      Don't touch the method headers.
-    """
-
+    def __init__(self):
+        super().__init__()
+        self.lastMove = 'Stop'
+        self.oppositeMove = {
+            'East': 'West',
+            'West': 'East',
+            'North': 'South',
+            'South': 'North',
+            'Stop': 'Stop'
+        }
+        self.plan = ['Stop']
+        self.planScore = 0
 
     def getAction(self, gameState):
         """
@@ -20,34 +26,27 @@ class NewAgent(Agent):
         getAction takes a GameState and returns
         some Directions.X for some X in the set {North, South, West, East, Stop}
         """
-        
+        print(self.planScore)
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
 
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+        print(legalMoves)
         print(scores)
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        
-        return legalMoves[chosenIndex]
+        print(legalMoves[chosenIndex] != self.plan[0])
+        if(legalMoves[chosenIndex] != self.plan[0]):
+            self.plan = ['Stop']
+            self.planScore = 0
+        else :
+            self.plan.pop()
+        self.lastMove = legalMoves[chosenIndex]
+        return self.lastMove
 
     def evaluationFunction(self, currentGameState, action):
-        """
-        Design a better evaluation function here.
-
-        The evaluation function takes in the current and proposed successor
-        GameStates (pacman.py) and returns a number, where higher numbers are better.
-
-        The code below extracts some useful information from the state, like the
-        remaining food (newFood) and Pacman position after moving (newPos).
-        newScaredTimes holds the number of moves that each ghost will remain
-        scared because of Pacman having eaten a power pellet.
-
-        Print out these variables to see what you're getting, then combine them
-        to create a masterful evaluation function.
-        """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         #newPos = successorGameState.getPacmanPosition()
@@ -69,23 +68,45 @@ class NewAgent(Agent):
         actions = []
         total = 0
         count = 0
-        
+        curplan = []
+        curplan.append(action)
         #check if goal node has been reached
         goalReached = False
         newGS = successorGameState
+        oldpos = currentGameState.getPacmanPosition()
         pos = newGS.getPacmanPosition()
-        ghostPos = newGS.getGhostPositions()
-        for gp in ghostPos:
+        ghostState = newGS.getGhostStates()
+        fud = newGS.getFood()
+        #for x in range(fud.width):
+        #    for y in range(fud.height):
+        #        if fud[x][y] :
+        #            nd = abs(pos[0] - x)
+        #            nd = nd + abs(pos[1] - y)
+        #            od = abs(oldpos[0] - x)
+        #            od = od + abs(oldpos[1] - y) 
+        #            if(nd < od):
+        #                total += 1
+        #                break
+        for ghost in ghostState:
+            gp = ghost.getPosition()
             d = abs(pos[0] - gp[0])
             d = d + abs(pos[1] - gp[1])
-            if(d <= 1): 
+            if(d <= 1 & ghost.scaredTimer < 1): 
                 total -= 1000
                 goalReached = True
-        if(newGS.isWin()):
+        if oldpos == pos:
+            total -= 10
+            goalReached = True
+        if fud[pos[0]][pos[1]]:
+            total += 500
+        if action == self.oppositeMove[self.lastMove] :
+            total -= 50
+        if newGS.isWin():
                     return 1000000
-        print("search for goal state: pellets = 0")
+        chosenAction = 'Stop'
+        #print("search for goal state: pellets = 0")
         #If goal node has not been reached, find next node. Else return score
-        while (goalReached == False):
+        while (goalReached == False and count < 20):
                        
             legalMoves = successorGameState.getLegalActions()
 
@@ -94,6 +115,10 @@ class NewAgent(Agent):
             for action in legalMoves:
                 newGS = successorGameState.generatePacmanSuccessor(action)
                 score = newGS.getScore() - (newGS.getNumFood() - currentGameState.getNumFood())
+                if(newGS.getPacmanPosition() == successorGameState.getPacmanPosition() 
+                or action == self.oppositeMove[chosenAction] 
+                or newGS.getPacmanPosition() == oldpos):
+                    score -= 50
                 #print(score)
                 if(newGS.isWin()):
                     return 100000/(count+1)
@@ -103,17 +128,27 @@ class NewAgent(Agent):
             bestScore = max(scores)
             bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
             chosenIndex = random.choice(bestIndices)
-            actions.remove(legalMoves[chosenIndex])
+            chosenAction = legalMoves[chosenIndex]
+            curplan.append(chosenAction)
+            #actions.remove(legalMoves[chosenIndex])
             total+=scores.pop(chosenIndex)
+            if(total > self.planScore):
+                #print(self.planScore)
+                #print("Replaced by")
+                #print(total)
+                self.plan = curplan
+                self.planScore = total
             successorGameState=successorGameState.generatePacmanSuccessor(legalMoves[chosenIndex])
             
             
-            if successorGameState.getNumFood() == 0 or count == 20:
+            if successorGameState.getNumFood() == 0:
                 goalReached = True
             count+= 1
             
-        print("goal state reached.")
+        #print("goal state reached.")
         #return total score
+        if(action == self.plan[0] and not goalReached):
+            total = self.planScore
         return total/(count+1)
         #return successorGameState.getScore()
         
